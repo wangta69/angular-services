@@ -1,4 +1,4 @@
-# WindowRef.ts
+# admob.service.ts
 
 ## How to use
 ### refer : https://ionicframework.com/docs/native/admob-pro/

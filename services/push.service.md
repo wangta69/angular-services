@@ -1,4 +1,4 @@
-# WindowRef.ts
+# push.service.ts
 
 ## How to use
 ### refer : https://ionicframework.com/docs/native/push/
