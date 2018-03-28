@@ -9,10 +9,11 @@ export class SocketService {
 	private url = 'http://xxx.xxx.xxx.xxx:portNumber';
 	public socket;
 
-	sockConnection:any = {}
-	Rooms		= [];
+	_rooms		= [];
 
-	constructor(protected storage:LocalStorageService) { }
+	constructor(protected storage:LocalStorageService) {
+
+	}
 
 	init(url){
 
@@ -21,88 +22,30 @@ export class SocketService {
 		this.socket = io(this.url);
 
 		this.On('connection').subscribe(obj => {
-            //console.log("onconnection.....");
-			//let my_data:any = obj;
 			this.setLogin();
 		})
+
+		this.socket.on('error', (error) => {
+			console.log('socket error');
+			console.log(error);
+		});
+
+		this.socket.on('disconnect', (reason) => {
+			console.log('disconnected');
+			console.log(reason);
+		});
+
+		this.socket.on('reconnect', (attemptNumber) => {
+			console.log('reconnecting..'+attemptNumber);
+		});
 	}
 
 	setLogin(){
-
-	//	let socket_login:any = {};//이곳에 현재 보는 그래프의 기본 정보도 전달
         this.storage.getObject('user').then((res) => {
             //{"id":13,"name":"kingFighter","email":"wangta69@gmail.com","avatar":"http://www.coinvill.co.kr/storage/user/2018/01/13.png?date=2018-03-08 16:11"}
-            this.EmitCallback(function(obj){
-    			//console.log(obj);
-    		},'login', res);//로그인 정보를 node에 전달한다.
+            this.Emit('login', res);//로그인 정보를 node에 전달한다.
         });
 
-	}
-
-
-	Emit(...args:any[]){
-		if(args.length == 2)
-			this.socket.emit(args[0], args[1]);
-		else if(args.length == 3)
-			this.socket.emit(args[0], args[1], args[2]);
-		else
-			this.socket.emit(args[0], args[1], args[2], args[3]);
-	}
-
-	EmitCallback(callback:Function, ...args:any[]){
-		if(args.length == 1){
-    		this.socket.emit(args[0], function(obj){
-    			callback(obj);
-    		});
-		}else if(args.length == 2){
-			this.socket.emit(args[0], args[1], function(obj){
-				callback(obj);
-			});
-		}else if(args.length == 3){
-			this.socket.emit(args[0], args[1], args[2], function(obj){
-				callback(obj);
-			});
-		}else{
-			this.socket.emit(args[0], args[1], args[2], args[3], function(obj){
-				callback(obj);
-			});
-        }
-	}
-
-	removeAllListener(eventName, callback) {
-		//this.socket.removeAllListeners(eventName, function() {
-		//	var args = arguments;
-		//});
-	}
-
-	removeListener(connection, callback?){
-		let sConn;
-		eval('sConn = this.sockConnection.'+connection) ;
-		if(typeof sConn == 'undefined')
-			return;
-		if(typeof sConn.length != 'undefined' && sConn.length > 0){
-			for(var i=0; i < sConn.length; i++){
-				sConn[i].unsubscribe();
-			}
-			eval('this.sockConnection.'+connection+'=[]') ;
-			//sConn = [];
-		}
-		if(typeof callback == 'function')
-			callback();
-
-	}
-
-	joinRoom(room){
-		this.Rooms.push(room);
-		this.Emit("joinRoom", {room:room});
-	}
-
-	leaveRoom(){
-		for(let i=0; i<this.Rooms.length; i++){
-			let room = this.Rooms[i];
-			this.Emit("leave_curent_room", room);
-		}
-		this.Rooms = [];
 	}
 
 	On(key) {//두개의 인자값을 받아서 하나의 object로 결합하워 callback
@@ -116,4 +59,104 @@ export class SocketService {
 		})
 		return observable;
 	}
+
+	Emit(...args:any[]){
+		this.socket.emit(...args);
+	}
+
+	/*
+	removeAllListener(eventName, callback):Promise<any> {
+		return new Promise(resolve => {
+	        resolve(true);
+		});
+	}
+	*/
+
+	removeListener(name):Promise<any>{
+		this.socket.off(name);
+
+		return new Promise(resolve => {
+	        resolve(true);
+		});
+	}
+
+	/**
+	[server side]
+	socket.on('joinRoom', function(req){
+         try{
+            assert(req.room);
+            socket.join(req.room);
+        }catch(e){
+            console.log("joinRoom error occur");
+            console.log(e);
+        }
+    });
+	**/
+	joinRoom(room):Promise<boolean>{
+		if(!this.in_array(room, this._rooms)){
+			this.room = room;
+			this.Emit("joinRoom", {room:room});
+		}
+
+		return new Promise(resolve => {
+	        resolve(true);
+		});
+	}
+
+	/**
+	[server side]
+	socket.on('leaveRoom', function(req){
+		 try{
+			assert(req.room);
+			socket.leave(req.room);
+		}catch(e){
+			console.log("leaveRoom error occur");
+			console.log(e);
+		}
+	});
+	*/
+	leaveRoom(room):Promise<boolean>{
+		const index = this._rooms.indexOf(room);
+	    this._rooms.splice(index, 1);
+
+		this.Emit("leaveRoom", {room:room});
+
+		return new Promise(resolve => {
+	        resolve(true);
+		});
+	}
+
+	/**
+	* leave from all rooms
+	*/
+	leaveRooms():Promise<boolean>{
+		for(let i=0; i<this._rooms.length; i++){
+			let room = this._rooms[i];
+			this.Emit("leaveRoom", {room:room});
+		}
+		this._rooms = [];
+		return new Promise(resolve => {
+	        resolve(true);
+		});
+	}
+
+
+
+
+	set room(room:string){
+		this._rooms.push(room);
+	}
+	/*
+	get rooms():any{
+		return this._rooms;
+	}
+*/
+
+	private in_array(needle, haystack) {
+	    for(var i in haystack) {
+	        if(haystack[i] == needle) return true;
+	    }
+	    return false;
+	};
+
 }
