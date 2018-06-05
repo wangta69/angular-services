@@ -1,50 +1,42 @@
 
-import { Injectable }		from '@angular/core';
-import { AdMobPro }         from '@ionic-native/admob-pro';
-import { Platform }	        from 'ionic-angular';
+import { Injectable } from '@angular/core';
+import { AdMobPro } from '@ionic-native/admob-pro';
+import { Platform } from 'ionic-angular';
 
-//https://developers.google.com/admob/android/banner
-//https://github.com/floatinghotpot/cordova-admob-pro/tree/master/docs
+// https://developers.google.com/admob/android/banner
+// https://github.com/floatinghotpot/cordova-admob-pro/tree/master/docs
 @Injectable()
 export class AdMobService {
 
-    admobid:any = {banner:'', interstitial:''};
-    _options:any = {};
+    admobid: any = {banner: '', interstitial: ''};
+    _options: any = {};
 
-	constructor( public platform: Platform, private admob: AdMobPro) {
-
-        //this._options = options;
-        console.log(this._options);
-        console.log(this.admob);
-        //console.log(this._options)
-        if(platform.is('cordova')){
-            if(platform.is('android')){
+    constructor( public platform: Platform, private admob: AdMobPro) {
+        if (platform.is('cordova')) {
+            if (platform.is('android')) {
                 this.admobid.banner = 'ca-app-pub-xxxxxxxxxxxxxx/yyyyyyyyyyyy';
                 this.admobid.interstitial = 'ca-app-pub-aaaaaaaaaa/bbbbbbbbbb';
-            }else if(platform.is('ios')){
+            } else if (platform.is('ios')) {
                 this.admobid.banner = '';
                 this.admobid.interstitial = '';
             }
         }
-
-        //set default
         this.init();
-
-    }//, private appVersion: AppVersion
+    } // private appVersion: AppVersion
 
     /*
-    //position = 0:NO_CHANGE,  1:Top Left, 2:Top Center, 3:Top Right, 4:Left, 5: Center, 6:Right, 7: Bottom Left, 8:Bottom Center, 9 : Bottom Right, 10:AD_POSITION.POS_XY
-    // overlap : if position is not top or bottom set to true
-    //adSize = SMART_BANNER, BANNER, MEDIUM_RECTANGLE, FULL_BANNER, LEADERBOARD, SKYSCRAPER, CUSTOM
-    //offsetTopBar, boolean, offset position of banner and webview to avoid overlap by status bar (iOS7+)
-    //options.x, optioins.y work when overlap:true and position:10
-    //options.width, options.height work when adSize:CUSTOM
+    position = 0:NO_CHANGE,  1:Top Left, 2:Top Center, 3:Top Right, 4:Left, 5: Center, 6:Right, 7: Bottom Left, 8:Bottom Center,
+    9 : Bottom Right, 10:AD_POSITION.POS_XY
+    overlap : if position is not top or bottom set to true
+    adSize = SMART_BANNER, BANNER, MEDIUM_RECTANGLE, FULL_BANNER, LEADERBOARD, SKYSCRAPER, CUSTOM
+    offsetTopBar, boolean, offset position of banner and webview to avoid overlap by status bar (iOS7+)
+    options.x, optioins.y work when overlap:true and position:10
+    options.width, options.height work when adSize:CUSTOM
     */
-    private init(){
-        //set Default options
-        this._options.adSize='SMART_BANNER',
-    	this._options.overlap = false,
-    	this._options.position = 8,
+    private init() {
+        this._options.adSize = 'SMART_BANNER';
+        this._options.overlap = false;
+        this._options.position = 8;
         this._options.autoShow = true;
         this._options.offsetTopBar = true;
         this._options.width = 0;
@@ -55,84 +47,85 @@ export class AdMobService {
         this._options.isTesting = false;
     }
 
-    set options(obj){
+    set options(obj) {
         Object.keys(obj).forEach(key => {
-          //let value = obj[key];
           this._options[key] = obj[key];
         });
-        //this.setOptions();
     }
 
-    get options():any{
+    get options(): any {
         return this._options;
     }
 
-    public createBanner(){
-        if(this.admobid.banner == '')
+    public createBanner() {
+        if (this.admobid.banner === '') {
             return;
+        }
 
-        this.removeBanner(); //기존 베너가 있을 경우 삭제한다.
-        this.setOptions();//옵션값을 설정한다.
-        //console.log(this.options);
-        this.admob.createBanner({adId:this.admobid.banner})
+        this.removeBanner(); // 기존 베너가 있을 경우 삭제한다.
+        this.setOptions(); // 옵션값을 설정한다.
+        this.admob.createBanner({adId: this.admobid.banner})
         .then(
-            function(res) { console.log(res)  },
-            function(err) { console.log(err)  }
-        )
+            function(res) { console.log(res);  },
+            function(err) { console.log(err);  }
+        );
     }
 
-    private setOptions(){
+    private setOptions() {
         this.admob.setOptions( {
             overlap: this.options.overlap,
             offsetTopBar: this.options.offsetTopBar,
             adSize: this.options.adSize,
-            width: parseInt(this.options.width),
-            height: parseInt(this.options.height),
-            position:parseInt(this.options.position),
-            x : parseInt(this.options.x),
-            y : parseInt(this.options.y),
-            autoShow:this.options.autoShow,
-            orientationRenew:this.options.orientationRenew,
-            isTesting:this.options.isTesting
+            width: parseInt(this.options.width, 10),
+            height: parseInt(this.options.height, 10),
+            position: parseInt(this.options.position, 10),
+            x : parseInt(this.options.x, 10),
+            y : parseInt(this.options.y, 10),
+            autoShow: this.options.autoShow,
+            orientationRenew: this.options.orientationRenew,
+            isTesting: this.options.isTesting
 
-        } ).then((res) => {console.log('setOptions result'); console.log(res)  });
+        } ).then((res) => {console.log('setOptions result'); console.log(res); });
     }
 
 
-    public set_size(width, height){
-        this.options = {adSize:'CUSTOM',  width:width, height:height}
+    public set_size(width, height) {
+        this.options = {adSize: 'CUSTOM', width: width, height: height};
     }
 
-    public set_position(x, y){
-        this.options = {position:10, x:x, y:y}
+    public set_position(x, y) {
+        this.options = {position: 10, x: x, y: y};
     }
 
 
-    public getAdSettings(){
+    public getAdSettings() {
         return this.admob.getAdSettings();
     }
 
-    public interstitial(){
-        // preppare and load ad resource in background, e.g. at begining of game level
-        if(this.admob) this.admob.prepareInterstitial( {adId:this.admobid.banner, autoShow:false} );
+    public interstitial() {
 
-        // show the interstitial later, e.g. at end of game level
-        if(this.admob) this.admob.showInterstitial();
+        if (this.admob) {
+            // preppare and load ad resource in background, e.g. at begining of game level
+            this.admob.prepareInterstitial( {adId: this.admobid.banner, autoShow: false} );
+
+            // show the interstitial later, e.g. at end of game level
+            this.admob.showInterstitial();
+        }
     }
 
-    public showBanner(position){
+    public showBanner(position) {
         this.admob.showBanner(position);
     }
 
-    public hideBanner(){
+    public hideBanner() {
         this.admob.hideBanner();
     }
 
-    public removeBanner(){
+    public removeBanner() {
         this.admob.removeBanner();
     }
 
-    public showBannerAtXY(x, y){
+    public showBannerAtXY(x, y) {
         this.admob.showBannerAtXY(x, y);
     }
 }
