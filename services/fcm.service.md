@@ -3,7 +3,8 @@
 ## How to use
 ### refer : https://ionicframework.com/docs/native/fcm/
 ### imports Service
-``` app.module.ts
+--- app.module.ts
+```
 import { FCM }              from '@ionic-native/fcm';
 import { FCMService }			from './fcm.service';
 
