@@ -24,6 +24,7 @@ protected startTimer() {
         return;
     }
     this.gameTimer = this.timerService.gameTimer().getInstance();
+    this.gameTimer.setDateFormat('korAMPM');
     this.gameTimer.countdownStart(this.serverTime, function(obj) { // Object {next_no: 178, countdown_ii: 3, countdown_ss: 33}
         this.timerInfo = obj;
         this.timerInfo.remainTime = obj.countdown_ii + '분 ' + obj.countdown_ss + '초';
