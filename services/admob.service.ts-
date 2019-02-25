@@ -1,7 +1,7 @@
 
 import { Injectable } from '@angular/core';
 import { AdMobPro } from '@ionic-native/admob-pro';
-import { Platform } from 'ionic-angular';
+import { Platform } from '@ionic/angular';
 
 // https://developers.google.com/admob/android/banner
 // https://github.com/floatinghotpot/cordova-admob-pro/tree/master/docs

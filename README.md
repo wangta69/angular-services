@@ -8,3 +8,6 @@
 
 ## admob.service.ts  (using cordova-plugin-admobpro)
 [how to use ](services/admob.service.md)
+
+## event.service.ts  (using cordova-plugin-admobpro)
+[how to use ](services/event.service.md)
